@@ -14,8 +14,8 @@ let videoVisible = false;
 function updateVideoButton() { const playing = !video.paused && !video.ended; videoButton.textContent = playing ? 'Pausar vídeo' : 'Reproduzir vídeo'; videoButton.setAttribute('aria-pressed', String(playing)); }
 async function syncVideo() {
   if (!wantsVideo || !videoVisible || document.hidden) { video.pause(); return; }
-  const source = video.querySelector('source');
-  if (!source.getAttribute('src')) { source.src = source.dataset.src; video.muted = true; video.load(); }
+  const sources = [...video.querySelectorAll('source')];
+  if (!sources[0].getAttribute('src')) { sources.forEach(source => { source.src = source.dataset.src; }); video.muted = true; video.load(); }
   try { await video.play(); videoMessage.hidden = true; }
   catch (error) { if (error.name !== 'AbortError') { wantsVideo = false; updateVideoButton(); } }
 }
@@ -24,7 +24,9 @@ video.addEventListener('play', updateVideoButton);
 video.addEventListener('pause', updateVideoButton);
 function videoFailed() { videoMessage.textContent = 'O vídeo não carregou. A imagem mantém a referência visual do processo.'; videoMessage.hidden = false; wantsVideo = false; updateVideoButton(); }
 video.addEventListener('error', videoFailed);
-video.querySelector('source').addEventListener('error', videoFailed);
+video.querySelectorAll('source').forEach(source => source.addEventListener('error', () => {
+  if (source === video.lastElementChild) videoFailed();
+}));
 new IntersectionObserver(entries => { videoVisible = entries[0].isIntersecting; syncVideo(); }, { threshold: .12 }).observe(video);
 document.addEventListener('visibilitychange', syncVideo);
 reducedMotion.addEventListener('change', event => { if (event.matches) { wantsVideo = false; syncVideo(); } });
@@ -46,7 +48,23 @@ const stories = [...document.querySelectorAll('.scroll-story')].map(element => (
   progress: element.querySelector('.story-progress span'),
   index: -1
 }));
-const storyMode = matchMedia('(min-height: 650px) and (prefers-reduced-motion: no-preference)');
+const storyMode = matchMedia('(min-width: 761px), (min-height: 500px)');
+const motionButton = document.querySelector('#motion-toggle');
+let motionChoice = null;
+try { motionChoice = sessionStorage.getItem('az3-motion'); } catch {}
+function configureMotion() {
+  const enabled = motionChoice === null ? !reducedMotion.matches : motionChoice === 'on';
+  document.documentElement.classList.toggle('motion-enabled', enabled);
+  motionButton.setAttribute('aria-pressed', String(enabled));
+  motionButton.textContent = enabled ? 'Desativar transições' : 'Ativar transições';
+}
+motionButton.addEventListener('click', () => {
+  motionChoice = document.documentElement.classList.contains('motion-enabled') ? 'off' : 'on';
+  try { sessionStorage.setItem('az3-motion', motionChoice); } catch {}
+  configureMotion();
+});
+reducedMotion.addEventListener('change', configureMotion);
+configureMotion();
 let queuedFrame = false;
 let headerHeight = 88;
 function updateStories() {

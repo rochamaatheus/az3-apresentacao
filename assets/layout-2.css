@@ -52,7 +52,20 @@
   .topbar,.section,.work-section,.shop-section,.project-section,.footer{padding-left:max(6%,env(safe-area-inset-left));padding-right:max(6%,env(safe-area-inset-right))}
   .footer{padding-bottom:calc(115px + env(safe-area-inset-bottom,0px))}
 }
-@media(max-height:649px){.topbar{position:relative}.story-inline svg,.story-inline img{max-height:240px}.story-step{padding:30px 0}.story-step>p{max-width:60ch}}
+@media(max-height:649px){.scroll-enhanced .story-screen{height:clamp(100px,35svh,220px)}.scroll-enhanced .story-step{padding:30px 0 64px;min-height:85svh}.scroll-enhanced .story-visual{top:calc(var(--header-height,88px) + 8px)}}
 @media(prefers-reduced-motion:reduce){.story-frame{transition:none}.story-progress span{transition:none}}
 @media print{.story-visual{display:none!important}.story-inline{display:block!important}.scroll-story{display:block!important}.story-step{min-height:0!important;break-inside:avoid}.topbar,.presentation-bar{position:static}}
 .topbar{background:#fff}
+.story-tools{max-width:1440px;margin:auto;padding:22px 6% 0;display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:13px;color:var(--muted)}
+.story-tools button{min-height:44px;padding:10px 16px;border:1px solid #aaa;background:white;color:#222;font-size:13px;flex-shrink:0}
+html:not(.motion-enabled) .story-frame{transform:none;transition:none!important}
+html:not(.motion-enabled) .story-progress span{transition:none!important}
+html.motion-enabled .story-frame{transition:opacity .45s ease,transform .55s cubic-bezier(.2,.7,.2,1)!important}
+html.motion-enabled .story-progress span{transition:transform .5s ease!important}
+@media(min-width:761px){
+  html:not(.scroll-enhanced) .story-step{display:grid;grid-template-columns:1fr 1fr;column-gap:7%;align-content:center}
+  html:not(.scroll-enhanced) .story-inline{grid-column:1;grid-row:1 / span 5;margin:0}
+  html:not(.scroll-enhanced) .story-step>:not(.story-inline){grid-column:2}
+}
+@media(max-width:760px){.story-tools{align-items:flex-start;flex-direction:column}}
+@media(max-width:760px) and (max-height:499px){.topbar{position:relative}.story-inline svg,.story-inline img{max-height:180px}}
